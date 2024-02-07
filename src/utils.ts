@@ -44,8 +44,12 @@ export class wledAPI {
     }
   }
 
-  async state(){
-    return await this.get('state');
+  async state(json?: object){
+    if(!json){
+      return await this.get('state');
+    }else{
+      return await this.post('state', json);
+    }
   }
 
   async info(){
@@ -58,5 +62,75 @@ export class wledAPI {
 
   async palettes(){
     return await this.get('palettes');
+  }
+
+  async turnOn(){
+    return await this.state({'on': true});
+  }
+
+  async turnOff(){
+    return await this.state({'on': false});
+  }
+
+  async toggle(){
+    return await this.state({'on': 't'});
+  }
+
+  /**
+   * Set brightness of instance
+   * @param value number - between 0 and 255
+   * @returns Promise
+   */
+  async brightness(value: number){
+    return await this.state({'bri': value});
+  }
+
+  async preset(value: number){
+    return await this.state({'ps': value});
+  }
+
+  /* SEGMENT METHODS */
+  async segmentOn(segment: number){
+    return await this.state({
+      'seg': [
+        {
+          'id': segment,
+          'on': true,
+        },
+      ],
+    });
+  }
+
+  async segmentOff(segment: number){
+    return await this.state({
+      'seg': [
+        {
+          'id': segment,
+          'on': false,
+        },
+      ],
+    });
+  }
+
+  async segmentToggle(segment: number){
+    return await this.state({
+      'seg': [
+        {
+          'id': segment,
+          'on': 't',
+        },
+      ],
+    });
+  }
+
+  async segmentBrightness(segment: number, value: number){
+    return await this.state({
+      'seg': [
+        {
+          'id': segment,
+          'bri': value,
+        },
+      ],
+    });
   }
 }

@@ -33,8 +33,6 @@ export class ZhephreeWLED implements DynamicPlatformPlugin {
       this.log.debug('No WLED Instances have been configured');
     }
 
-    this.wledAPI = new wledAPI(this.config.host, this.log);
-
     this.log.debug('Finished initializing platform:', this.config.name);
 
     // When this event is fired it means Homebridge has restored all cached accessories from disk.
@@ -64,9 +62,50 @@ export class ZhephreeWLED implements DynamicPlatformPlugin {
    * Accessories must only be registered once, previously created accessories
    * must not be registered again to prevent "duplicate UUID" errors.
    */
-  discoverDevices() {
+  async discoverDevices() {
+    const instances = this.config.wleds;
+    for(const instance of instances){
+      const wled_api = new wledAPI(instance.host, this.log);
+      try{
+        const state = await wled_api.state();
+        const info = await wled_api.info();
 
-    this.wledAPI.info();
+        const segments = state.seg;
+
+        const mac = info.mac;
+        const controller_uuid = this.api.hap.uuid.generate(mac);
+        const existingController = this.accessories.find(accessory => accessory.UUID === controller_uuid);
+        if(existingController){
+          this.log.info('Restoring existing controller from cache:', existingController.displayName);
+        }else{
+          //TODO: register main controller Light Accessory
+          this.log.info('Adding new controller:', info.name);
+        }
+
+        if(segments.length > 1){
+          for(const segment of segments){
+            const segment_uuid = this.api.hap.uuid.generate(mac + '_' + segment.id);
+            const existingSegment = this.accessories.find(accessory => accessory.UUID === segment_uuid);
+            if(existingSegment){
+              this.log.info('Restoring existing segment from cache:', existingSegment.displayName);
+            }else{
+              //TODO: register each segment as a Light Accessory
+              const name = Object.prototype.hasOwnProperty.call(segment, 'n')? segment.n: info.name + ' ' + segment.id;
+              this.log.info('Adding new segment:', name);
+            }
+          }
+        }
+      }catch(err: unknown){
+        let error;
+        if(typeof err === 'string'){
+          error = err;
+        }else if(err instanceof Error){
+          error = err.message;
+        }
+        this.log.error('Error getting segments');
+        this.log.error(error);
+      }
+    }
 
     // EXAMPLE ONLY
     // A real plugin you would discover accessories from the local network, cloud services

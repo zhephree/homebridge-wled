@@ -22,7 +22,8 @@
               "title": "IP Address or Host Name",
               "description": "Either the IP Address or the mDNS hostname of the instance",
               "type": "string",
-              "required": true
+              "required": true,
+              "format": "hostname"
             }
           }
         }
