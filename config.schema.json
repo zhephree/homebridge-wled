@@ -1,15 +1,31 @@
 {
-  "pluginAlias": "WLED",
+  "pluginAlias": "ZhephreeWLED",
   "pluginType": "platform",
   "singular": true,
   "schema": {
     "type": "object",
     "properties": {
-      "name": {
-        "title": "Name",
-        "type": "string",
-        "required": true,
-        "default": "WLED from @zhephree"
+      "wleds": {
+        "type": "array",
+        "title": "wleds",
+        "items": {
+          "type": "object",
+          "title": "WLED Instance",
+          "properties": {
+            "name": {
+              "title": "Instance Name",
+              "description": "Name of this instance",
+              "type": "string",
+              "required": true
+            },
+            "host": {
+              "title": "IP Address or Host Name",
+              "description": "Either the IP Address or the mDNS hostname of the instance",
+              "type": "string",
+              "required": true
+            }
+          }
+        }
       }
     }
   }
